@@ -6,7 +6,7 @@
     "checkJs": false,
     "declaration": true,
     "esModuleInterop": true,
-    "lib": ["esnext"],
+    "lib": ["esnext", "dom"],
     "module": "CommonJS",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
@@ -24,5 +24,5 @@
     "strict": true,
     "target": "ES2018"
   },
-  "include": ["./src/"]
+  "include": ["./src/index.ts"]
 }

@@ -31,5 +31,5 @@ jobs:
       - run: yarn install --frozen-lockfile
         if: steps.yarn-cache.outputs.cache-hit != 'true'
 
-      - run: yarn test:unit
+      - run: yarn test
       - run: yarn build
