@@ -1,0 +1,27 @@
+{
+  "name": "urltron",
+  "version": "0.0.1",
+  "description": "Stringify and parse json from url query parameters",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nojvek/urltron.git"
+  },
+  "keywords": [
+    "json",
+    "stringify",
+    "parse",
+    "url",
+    "query",
+    "parameters"
+  ],
+  "author": "nojvek",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nojvek/urltron/issues"
+  },
+  "homepage": "https://github.com/nojvek/urltron#readme"
+}
