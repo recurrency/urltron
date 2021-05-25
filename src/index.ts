@@ -50,6 +50,9 @@ export function _stringify(val: any, depth: number): string {
   }
 }
 
+/**
+ * Stringify object or array to query params-ish string
+ */
 export function stringify(val: any): string {
   if (typeof val === 'object') {
     throw new Error(`urltron only supports stringify for objects and arrays`);
@@ -57,6 +60,9 @@ export function stringify(val: any): string {
   return _stringify(val, 0);
 }
 
+/**
+ * Parse object or array from query params-ish string
+ */
 export function parse(str: string): any {
   return str;
 }
