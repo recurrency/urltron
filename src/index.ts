@@ -68,9 +68,6 @@ interface Lexer {
 }
 
 function _lex(str: string): Lexer {
-  if (!str || (str[0] != '@' && str[0] != '(')) {
-    str = `(${str})`; // assume parsing object by default
-  }
   // split string while keeping delimiters
   // @see https://medium.com/@shemar.gordon32/how-to-split-and-keep-the-delimiter-s-d433fb697c65
   const tokens = str.split(/(?=[@()=&,])|(?<=[@()=&,])/g);
@@ -167,6 +164,10 @@ export function parse(str: string): any {
   if (str && str[0] == '?') {
     // remove ? prefix if user passes location.search
     str = str.slice(1);
+  }
+  if (!str || (str[0] != '@' && str[0] != '(')) {
+    // assume parsing object by default
+    str = `(${str})`;
   }
   return _parseValue(_lex(str));
 }
