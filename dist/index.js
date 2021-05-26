@@ -63,16 +63,13 @@ exports._stringify = _stringify;
  * Stringify object or array to query params-ish string
  */
 function stringify(val) {
-    if (typeof val === 'object') {
+    if (typeof val !== 'object') {
         throw new Error(`urltron only supports stringify for objects and arrays`);
     }
     return _stringify(val, 0);
 }
 exports.stringify = stringify;
 function _lex(str) {
-    if (!str || (str[0] != '@' && str[0] != '(')) {
-        str = `(${str})`; // assume parsing object by default
-    }
     // split string while keeping delimiters
     // @see https://medium.com/@shemar.gordon32/how-to-split-and-keep-the-delimiter-s-d433fb697c65
     const tokens = str.split(/(?=[@()=&,])|(?<=[@()=&,])/g);
@@ -166,6 +163,10 @@ function parse(str) {
     if (str && str[0] == '?') {
         // remove ? prefix if user passes location.search
         str = str.slice(1);
+    }
+    if (!str || (str[0] != '@' && str[0] != '(')) {
+        // assume parsing object by default
+        str = `(${str})`;
     }
     return _parseValue(_lex(str));
 }
