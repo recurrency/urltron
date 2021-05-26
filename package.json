@@ -1,9 +1,13 @@
 {
   "name": "urltron",
-  "version": "0.0.1",
+  "version": "0.1.2",
   "description": "Stringify and parse json from url query parameters",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist/index.js",
+    "dist/index.d.ts"
+  ],
   "scripts": {
     "clean": "rm -rf dist",
     "build": "yarn clean && tsc",
