@@ -164,5 +164,9 @@ function _parseValue(lexer: Lexer): any {
  * Parse object or array from query params-ish string
  */
 export function parse(str: string): any {
+  if (str && str[0] == '?') {
+    // remove ? prefix if user passes location.search
+    str = str.slice(1);
+  }
   return _parseValue(_lex(str));
 }
