@@ -1,50 +1,48 @@
-const SAFE_CHARS = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$._-';
-const SAFE_CHARS_REGEX = new RegExp(`^[${SAFE_CHARS}]+$`);
-const SAFE_CHARS_SET = new Set(SAFE_CHARS.split('').map((c) => c.charCodeAt(0)));
-
-function escapeNonWordChars(val: string): string {
-  // All chars other than word chars are percent encoded
-  return Array.from(new TextEncoder().encode(val))
-    .map((code: number) =>
-      SAFE_CHARS_SET.has(code) ? String.fromCharCode(code) : `%${code.toString(16).toUpperCase()}`,
-    )
-    .join('');
+function encodeString(str: string): string {
+  return encodeURIComponent(str)
+    .replace(/[^%\w.-]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`)
+    .replace(/%20/g, '+'); // space is a frequently used character, use + instead
 }
 
 /**
  * Internal function that stringifies primitive values
  */
-export function _stringify(val: any, depth: number): string {
+export function _stringify(val: any): string {
   const valType = typeof val;
-  if (val === null) {
+  // JSON.stringify converts undefined and NaN to null
+  if (val === null || val === undefined) {
     return 'n';
   } else if (valType === 'boolean') {
     return val ? 't' : 'f';
   } else if (valType === 'number') {
-    return val.toString();
+    // JSON.stringify NaN/Number.POSITIVE_INFINITY is null
+    const str = JSON.stringify(val);
+    return str === 'null' ? 'n' : str;
   } else if (valType === 'string') {
     if (val === '') {
-      return "'";
+      return '~';
     } else if (/^[tfn]$/.test(val)) {
-      return `'${val}`;
+      return `~${val}`;
     } else if (/^-?[0-9]/.test(val)) {
-      return `'${escapeNonWordChars(val)}`;
-    } else if (SAFE_CHARS_REGEX.test(val)) {
+      // possibly a number, prefix with '
+      return `~${encodeString(val)}`;
+    } else if (/^[\w.-]+$/.test(val)) {
       return val;
     } else {
-      return escapeNonWordChars(val);
+      return encodeString(val);
     }
   } else if (Array.isArray(val)) {
-    return '@(' + val.map((v) => _stringify(v, depth + 1)).join(',') + ')';
+    return '@(' + val.map((v) => _stringify(v)).join(',') + ')';
   } else if (valType === 'object') {
-    const str = Object.entries(val)
-      // filter out undefined values like JSON.stringify
-      .filter(([_, v]) => v !== undefined)
-      .map(([k, v]) => `${_stringify(k, depth + 1)}=${_stringify(v, depth + 1)}`)
-      .join(`&`);
-
-    // only wrap in parentheses if nested object
-    return depth > 0 ? `(${str})` : str;
+    return (
+      '(' +
+      Object.entries(val)
+        // filter out undefined values like JSON.stringify
+        .filter(([_, v]) => v !== undefined)
+        .map(([k, v]) => `${_stringify(k)}=${v === '' ? v : _stringify(v)}`)
+        .join(`&`) +
+      ')'
+    );
   } else {
     throw new Error(`Unsupported value type: '${valType}' for ${val}`);
   }
@@ -54,15 +52,142 @@ export function _stringify(val: any, depth: number): string {
  * Stringify object or array to query params-ish string
  */
 export function stringify(val: any): string {
-  if (typeof val === 'object') {
+  if (typeof val !== 'object') {
     throw new Error(`urltron only supports stringify for objects and arrays`);
   }
-  return _stringify(val, 0);
+
+  let str = _stringify(val);
+  // remove brackets for objects so str looks like k1=v=k2=v2 query params
+  if (str.startsWith('(') && str.endsWith(')')) {
+    str = str.slice(1, str.length - 1);
+  }
+  return str;
+}
+
+interface Lexer {
+  tokens: string[];
+  peek: () => string | null;
+  next: () => boolean;
+}
+
+function _lex(str: string): Lexer {
+  // split string while keeping delimiters
+  // @see https://medium.com/@shemar.gordon32/how-to-split-and-keep-the-delimiter-s-d433fb697c65
+  const tokens = str.split(/(?=[@()=&,])|(?<=[@()=&,])/g);
+  let idx = 0;
+  return {
+    tokens,
+    peek: () => (idx < tokens.length ? tokens[idx] : null),
+    next: () => ((idx += 1), idx < tokens.length),
+  };
+}
+
+function _ensureToken(lexer: Lexer, expected: string, consume = true) {
+  if (lexer.peek() !== expected) {
+    throw new Error(`urltron.parse: expecting:'${expected}', found:'${lexer.peek()}'`);
+  }
+  if (consume) {
+    lexer.next();
+  }
+}
+
+function _parseObject(lexer: Lexer): Record<string, any> {
+  const obj: Record<string, any> = {};
+
+  _ensureToken(lexer, '(');
+  while (lexer.peek() !== ')') {
+    const key = _parseString(lexer);
+    _ensureToken(lexer, '=');
+
+    // handle special case of `k=` which represents value as empty string
+    let val;
+    if (lexer.peek() === '&' || lexer.peek() === ')') {
+      val = '';
+    } else {
+      val = _parseValue(lexer);
+    }
+
+    if (lexer.peek() !== ')') {
+      _ensureToken(lexer, '&');
+    }
+    obj[key] = val;
+  }
+  _ensureToken(lexer, ')');
+
+  return obj;
+}
+
+function _parseArray(lexer: Lexer): any[] {
+  const arr: any[] = [];
+
+  _ensureToken(lexer, '@');
+  _ensureToken(lexer, '(');
+  while (lexer.peek() !== ')') {
+    const val = _parseValue(lexer);
+    if (lexer.peek() !== ')') {
+      _ensureToken(lexer, ',');
+    }
+    arr.push(val);
+  }
+  _ensureToken(lexer, ')');
+
+  return arr;
+}
+
+function _parseString(lexer: Lexer): string {
+  let str = lexer.peek()!;
+
+  lexer.next();
+  if (str[0] === '~') {
+    str = str.slice(1);
+  }
+
+  return decodeURIComponent(str.replace(/\+/g, '%20'));
+}
+
+function _parseValue(lexer: Lexer): any {
+  const curToken = lexer.peek();
+  if (!curToken) {
+    throw new Error(`urltron.parse: invalid token:'${curToken}'`);
+  } else if (curToken === '(') {
+    return _parseObject(lexer);
+  } else if (curToken === '@') {
+    return _parseArray(lexer);
+  } else if (curToken === 't') {
+    lexer.next();
+    return true;
+  } else if (curToken === 'f') {
+    lexer.next();
+    return false;
+  } else if (curToken === 'n') {
+    lexer.next();
+    return null;
+  } else if (/^-?[0-9]/.test(curToken)) {
+    lexer.next();
+    return parseFloat(curToken);
+  } else {
+    return _parseString(lexer);
+  }
 }
 
 /**
  * Parse object or array from query params-ish string
  */
 export function parse(str: string): any {
-  return str;
+  if (!str) {
+    str = '()';
+  } else if (str[0] === '?' || str[0] == '#') {
+    // remove ?/# prefix if value comes directly from location.search or location.hash
+    str = str.slice(1);
+  }
+
+  if (str[0] != '@' && str[0] != '(') {
+    // assume parsing object by default
+    str = `(${str})`;
+  }
+
+  return _parseValue(_lex(str));
 }
+
+// so it can be imported as `import urltron from 'urltron';`
+export default {stringify, parse};
