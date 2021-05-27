@@ -11,17 +11,19 @@ function encodeNonWordChars(val) {
 /**
  * Internal function that stringifies primitive values
  */
-function _stringify(val, depth) {
+function _stringify(val) {
     const valType = typeof val;
     // JSON.stringify converts undefined and NaN to null
-    if (val === null || val === undefined || Number.isNaN(val)) {
+    if (val === null || val === undefined) {
         return 'n';
     }
     else if (valType === 'boolean') {
         return val ? 't' : 'f';
     }
     else if (valType === 'number') {
-        return val.toString();
+        // JSON.stringify NaN/Number.POSITIVE_INFINITY is null
+        const str = JSON.stringify(val);
+        return str === 'null' ? 'n' : str;
     }
     else if (valType === 'string') {
         if (val === '') {
@@ -41,16 +43,16 @@ function _stringify(val, depth) {
         }
     }
     else if (Array.isArray(val)) {
-        return '@(' + val.map((v) => _stringify(v, depth + 1)).join(',') + ')';
+        return '@(' + val.map((v) => _stringify(v)).join(',') + ')';
     }
     else if (valType === 'object') {
-        const str = Object.entries(val)
-            // filter out undefined values like JSON.stringify
-            .filter(([_, v]) => v !== undefined)
-            .map(([k, v]) => `${_stringify(k, depth + 1)}=${v === '' ? v : _stringify(v, depth + 1)}`)
-            .join(`&`);
-        // only wrap in parentheses if nested object
-        return depth > 0 ? `(${str})` : str;
+        return ('(' +
+            Object.entries(val)
+                // filter out undefined values like JSON.stringify
+                .filter(([_, v]) => v !== undefined)
+                .map(([k, v]) => `${_stringify(k)}=${v === '' ? v : _stringify(v)}`)
+                .join(`&`) +
+            ')');
     }
     else {
         throw new Error(`Unsupported value type: '${valType}' for ${val}`);
@@ -64,7 +66,12 @@ function stringify(val) {
     if (typeof val !== 'object') {
         throw new Error(`urltron only supports stringify for objects and arrays`);
     }
-    return _stringify(val, 0);
+    let str = _stringify(val);
+    // remove brackets for objects so str looks like k1=v=k2=v2 query params
+    if (str.startsWith('(') && str.endsWith(')')) {
+        str = str.slice(1, str.length - 1);
+    }
+    return str;
 }
 exports.stringify = stringify;
 function _lex(str) {
@@ -135,21 +142,21 @@ function _parseValue(lexer) {
     if (!curToken) {
         throw new Error(`urltron.parse: invalid token:'${curToken}'`);
     }
-    else if (curToken == '(') {
+    else if (curToken === '(') {
         return _parseObject(lexer);
     }
-    else if (curToken == '@') {
+    else if (curToken === '@') {
         return _parseArray(lexer);
     }
-    else if (curToken == 't') {
+    else if (curToken === 't') {
         lexer.next();
         return true;
     }
-    else if (curToken == 'f') {
+    else if (curToken === 'f') {
         lexer.next();
         return false;
     }
-    else if (curToken == 'n') {
+    else if (curToken === 'n') {
         lexer.next();
         return null;
     }
@@ -165,7 +172,7 @@ function _parseValue(lexer) {
  * Parse object or array from query params-ish string
  */
 function parse(str) {
-    if (str && str[0] == '?') {
+    if (str && str[0] === '?') {
         // remove ? prefix if user passes location.search
         str = str.slice(1);
     }

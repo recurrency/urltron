@@ -10,7 +10,7 @@ function encodeNonWordChars(val: string): string {
 /**
  * Internal function that stringifies primitive values
  */
-export function _stringify(val: any, depth: number): string {
+export function _stringify(val: any): string {
   const valType = typeof val;
   // JSON.stringify converts undefined and NaN to null
   if (val === null || val === undefined) {
@@ -34,16 +34,17 @@ export function _stringify(val: any, depth: number): string {
       return encodeNonWordChars(val);
     }
   } else if (Array.isArray(val)) {
-    return '@(' + val.map((v) => _stringify(v, depth + 1)).join(',') + ')';
+    return '@(' + val.map((v) => _stringify(v)).join(',') + ')';
   } else if (valType === 'object') {
-    const str = Object.entries(val)
-      // filter out undefined values like JSON.stringify
-      .filter(([_, v]) => v !== undefined)
-      .map(([k, v]) => `${_stringify(k, depth + 1)}=${v === '' ? v : _stringify(v, depth + 1)}`)
-      .join(`&`);
-
-    // only wrap in parentheses if nested object
-    return depth > 0 ? `(${str})` : str;
+    return (
+      '(' +
+      Object.entries(val)
+        // filter out undefined values like JSON.stringify
+        .filter(([_, v]) => v !== undefined)
+        .map(([k, v]) => `${_stringify(k)}=${v === '' ? v : _stringify(v)}`)
+        .join(`&`) +
+      ')'
+    );
   } else {
     throw new Error(`Unsupported value type: '${valType}' for ${val}`);
   }
@@ -56,7 +57,13 @@ export function stringify(val: any): string {
   if (typeof val !== 'object') {
     throw new Error(`urltron only supports stringify for objects and arrays`);
   }
-  return _stringify(val, 0);
+
+  let str = _stringify(val);
+  // remove brackets for objects so str looks like k1=v=k2=v2 query params
+  if (str.startsWith('(') && str.endsWith(')')) {
+    str = str.slice(1, str.length - 1);
+  }
+  return str;
 }
 
 interface Lexer {

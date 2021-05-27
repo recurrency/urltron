@@ -1,7 +1,7 @@
 /**
  * Internal function that stringifies primitive values
  */
-export declare function _stringify(val: any, depth: number): string;
+export declare function _stringify(val: any): string;
 /**
  * Stringify object or array to query params-ish string
  */

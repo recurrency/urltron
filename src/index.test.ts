@@ -11,7 +11,7 @@ interface ValTest {
 }
 
 describe('urltron', () => {
-  describe('_stringify primitives', () => {
+  describe('_stringify(val)', () => {
     const tests: ValTest[] = [
       {val: '', expect: "'"},
       {val: 'hello', expect: 'hello'},
@@ -44,13 +44,13 @@ describe('urltron', () => {
 
     for (const test of tests) {
       it(String(test.val), () => {
-        const str = _stringify(test.val, 0);
+        const str = _stringify(test.val);
         expect(str).toEqual(test.expect);
       });
     }
   });
 
-  describe('stringify, then parse is equal to val', () => {
+  describe('val |> stringify |> parse |> JSON.stringify === JSON.stringify(val)', () => {
     const tests: ValTest[] = [
       {
         name: 'simple array',
@@ -99,7 +99,7 @@ describe('urltron', () => {
 
     for (const test of tests) {
       it(test.name!, () => {
-        const str = stringify(test.val, 0);
+        const str = stringify(test.val);
         expect(str).toEqual(test.expect);
 
         if (typeof test.val === 'object' && test.val) {
