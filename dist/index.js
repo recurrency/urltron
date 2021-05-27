@@ -172,15 +172,20 @@ function _parseValue(lexer) {
  * Parse object or array from query params-ish string
  */
 function parse(str) {
-    if (str && str[0] === '?') {
-        // remove ? prefix if user passes location.search
+    if (!str) {
+        str = '()';
+    }
+    else if (str[0] === '?' || str[0] == '#') {
+        // remove ?/# prefix if value comes directly from location.search or location.hash
         str = str.slice(1);
     }
-    if (!str || (str[0] != '@' && str[0] != '(')) {
+    if (str[0] != '@' && str[0] != '(') {
         // assume parsing object by default
         str = `(${str})`;
     }
     return _parseValue(_lex(str));
 }
 exports.parse = parse;
+// so it can be imported as `import urltron from 'urltron';`
+exports.default = { stringify, parse };
 //# sourceMappingURL=index.js.map

@@ -5,7 +5,7 @@ const index_1 = require("./index");
 global.TextEncoder = require('util').TextEncoder;
 global.TextDecoder = require('util').TextDecoder;
 describe('urltron', () => {
-    describe('_stringify(val)', () => {
+    describe('_stringify()', () => {
         const tests = [
             { val: '', expect: "'" },
             { val: 'hello', expect: 'hello' },
@@ -48,6 +48,7 @@ describe('urltron', () => {
                 expect: "@(t,f,n,hello%20world,1.234,')",
             },
             { name: 'empty object', val: {}, expect: '' },
+            { name: 'empty array', val: [], expect: '@()' },
             {
                 name: 'simple object',
                 val: { limit: 10, offset: 20, query: 'hello world', notyet: undefined },
@@ -94,6 +95,18 @@ describe('urltron', () => {
                 }
             });
         }
+    });
+    describe('parse()', () => {
+        it('with ? and # prefix', () => {
+            expect(index_1.parse(`?`)).toEqual({});
+            expect(index_1.parse(`#`)).toEqual({});
+            expect(index_1.parse(``)).toEqual({});
+            expect(index_1.parse(`?query=&limit=10`)).toEqual({ query: '', limit: 10 });
+            expect(index_1.parse(`#query=&limit=10`)).toEqual({ query: '', limit: 10 });
+            expect(index_1.parse(`?@()`)).toEqual([]);
+            expect(index_1.parse(`#@()`)).toEqual([]);
+            expect(index_1.parse(`@()`)).toEqual([]);
+        });
     });
 });
 //# sourceMappingURL=index.test.js.map

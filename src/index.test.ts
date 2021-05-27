@@ -11,7 +11,7 @@ interface ValTest {
 }
 
 describe('urltron', () => {
-  describe('_stringify(val)', () => {
+  describe('_stringify()', () => {
     const tests: ValTest[] = [
       {val: '', expect: "'"},
       {val: 'hello', expect: 'hello'},
@@ -58,6 +58,7 @@ describe('urltron', () => {
         expect: "@(t,f,n,hello%20world,1.234,')",
       },
       {name: 'empty object', val: {}, expect: ''},
+      {name: 'empty array', val: [], expect: '@()'},
       {
         name: 'simple object',
         val: {limit: 10, offset: 20, query: 'hello world', notyet: undefined},
@@ -108,5 +109,18 @@ describe('urltron', () => {
         }
       });
     }
+  });
+
+  describe('parse()', () => {
+    it('with ? and # prefix', () => {
+      expect(parse(`?`)).toEqual({});
+      expect(parse(`#`)).toEqual({});
+      expect(parse(``)).toEqual({});
+      expect(parse(`?query=&limit=10`)).toEqual({query: '', limit: 10});
+      expect(parse(`#query=&limit=10`)).toEqual({query: '', limit: 10});
+      expect(parse(`?@()`)).toEqual([]);
+      expect(parse(`#@()`)).toEqual([]);
+      expect(parse(`@()`)).toEqual([]);
+    });
   });
 });
