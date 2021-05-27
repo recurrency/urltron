@@ -13,12 +13,14 @@ function encodeNonWordChars(val: string): string {
 export function _stringify(val: any, depth: number): string {
   const valType = typeof val;
   // JSON.stringify converts undefined and NaN to null
-  if (val === null || val === undefined || Number.isNaN(val)) {
+  if (val === null || val === undefined) {
     return 'n';
   } else if (valType === 'boolean') {
     return val ? 't' : 'f';
   } else if (valType === 'number') {
-    return val.toString();
+    // JSON.stringify NaN/Number.POSITIVE_INFINITY is null
+    const str = JSON.stringify(val);
+    return str === 'null' ? 'n' : str;
   } else if (valType === 'string') {
     if (val === '') {
       return "'";
@@ -141,17 +143,17 @@ function _parseValue(lexer: Lexer): any {
   const curToken = lexer.peek();
   if (!curToken) {
     throw new Error(`urltron.parse: invalid token:'${curToken}'`);
-  } else if (curToken == '(') {
+  } else if (curToken === '(') {
     return _parseObject(lexer);
-  } else if (curToken == '@') {
+  } else if (curToken === '@') {
     return _parseArray(lexer);
-  } else if (curToken == 't') {
+  } else if (curToken === 't') {
     lexer.next();
     return true;
-  } else if (curToken == 'f') {
+  } else if (curToken === 'f') {
     lexer.next();
     return false;
-  } else if (curToken == 'n') {
+  } else if (curToken === 'n') {
     lexer.next();
     return null;
   } else if (/^-?[0-9]/.test(curToken)) {
@@ -166,7 +168,7 @@ function _parseValue(lexer: Lexer): any {
  * Parse object or array from query params-ish string
  */
 export function parse(str: string): any {
-  if (str && str[0] == '?') {
+  if (str && str[0] === '?') {
     // remove ? prefix if user passes location.search
     str = str.slice(1);
   }
