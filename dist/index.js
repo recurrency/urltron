@@ -3,12 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.parse = exports.stringify = exports._stringify = void 0;
 const SAFE_CHARS = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$._-';
 const SAFE_CHARS_REGEX = new RegExp(`^[${SAFE_CHARS}]+$`);
-const SAFE_CHARS_SET = new Set(SAFE_CHARS.split('').map((c) => c.charCodeAt(0)));
-function escapeNonWordChars(val) {
-    // All chars other than word chars are percent encoded
-    return Array.from(new TextEncoder().encode(val))
-        .map((code) => SAFE_CHARS_SET.has(code) ? String.fromCharCode(code) : `%${code.toString(16).toUpperCase()}`)
-        .join('');
+const ENCODE_CHAR_REGEX = new RegExp(`[^%${SAFE_CHARS}]`, 'g');
+function encodeNonWordChars(val) {
+    // NOTE: not using encodeURIComponent since it encodes $ sign, we don't want that
+    return encodeURI(val).replace(ENCODE_CHAR_REGEX, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
 }
 /**
  * Internal function that stringifies primitive values
@@ -33,13 +31,13 @@ function _stringify(val, depth) {
             return `'${val}`;
         }
         else if (/^-?[0-9]/.test(val)) {
-            return `'${escapeNonWordChars(val)}`;
+            return `'${encodeNonWordChars(val)}`;
         }
         else if (SAFE_CHARS_REGEX.test(val)) {
             return val;
         }
         else {
-            return escapeNonWordChars(val);
+            return encodeNonWordChars(val);
         }
     }
     else if (Array.isArray(val)) {
@@ -49,7 +47,7 @@ function _stringify(val, depth) {
         const str = Object.entries(val)
             // filter out undefined values like JSON.stringify
             .filter(([_, v]) => v !== undefined)
-            .map(([k, v]) => `${_stringify(k, depth + 1)}=${_stringify(v, depth + 1)}`)
+            .map(([k, v]) => `${_stringify(k, depth + 1)}=${v === '' ? v : _stringify(v, depth + 1)}`)
             .join(`&`);
         // only wrap in parentheses if nested object
         return depth > 0 ? `(${str})` : str;
@@ -94,7 +92,14 @@ function _parseObject(lexer) {
     while (lexer.peek() !== ')') {
         const key = _parseString(lexer);
         _ensureToken(lexer, '=');
-        const val = _parseValue(lexer);
+        // handle special case of `k=` which represents value as empty string
+        let val;
+        if (lexer.peek() === '&' || lexer.peek() === ')') {
+            val = '';
+        }
+        else {
+            val = _parseValue(lexer);
+        }
         if (lexer.peek() !== ')') {
             _ensureToken(lexer, '&');
         }

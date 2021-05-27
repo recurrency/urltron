@@ -27,8 +27,8 @@ describe('urltron', () => {
         { val: null, expect: 'n' },
         {
             name: 'simple array',
-            val: [true, false, null, 'hello world', 1.234],
-            expect: '@(t,f,n,hello%20world,1.234)',
+            val: [true, false, null, 'hello world', 1.234, ''],
+            expect: "@(t,f,n,hello%20world,1.234,')",
         },
         { name: 'empty object', val: {}, expect: '' },
         {
@@ -42,23 +42,23 @@ describe('urltron', () => {
                 select: ['id', 'name', 'age'],
                 from: { table: 'users' },
                 where: [
-                    { field: 'name', op: '%', val: 'foo' },
+                    { field: 'name', op: '%', val: '' },
                     { field: 'age', op: '>', val: 20 },
                 ],
                 fullTable: true,
             },
-            expect: 'select=@(id,name,age)&from=(table=users)&where=@((field=name&op=%25&val=foo),(field=age&op=%3E&val=20))&fullTable=t',
+            expect: 'select=@(id,name,age)&from=(table=users)&where=@((field=name&op=%25&val=),(field=age&op=%3E&val=20))&fullTable=t',
         },
         {
             name: 'complex escaped object',
             val: {
                 '~!@#$%^&*()=%': {
-                    num: [1, 2.3, -3e100, true, false, null, undefined, NaN],
+                    num: [1, 2.3, -3e100, '', true, false, null, undefined, NaN],
                     str: ['1', '2', '3', 't', 'f', 'n'],
                     '': '',
                 },
             },
-            expect: "%7E%21%40%23$%25%5E%26%2A%28%29%3D%25=(num=@(1,2.3,-3e+100,t,f,n,n,n)&str=@('1,'2,'3,'t,'f,'n)&'=')",
+            expect: "%7E%21%40%23$%25%5E%26%2A%28%29%3D%25=(num=@(1,2.3,-3e+100,',t,f,n,n,n)&str=@('1,'2,'3,'t,'f,'n)&'=)",
         },
     ];
     for (const test of tests) {

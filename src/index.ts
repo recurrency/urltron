@@ -1,14 +1,10 @@
 const SAFE_CHARS = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$._-';
 const SAFE_CHARS_REGEX = new RegExp(`^[${SAFE_CHARS}]+$`);
-const SAFE_CHARS_SET = new Set(SAFE_CHARS.split('').map((c) => c.charCodeAt(0)));
+const ENCODE_CHAR_REGEX = new RegExp(`[^%${SAFE_CHARS}]`, 'g');
 
-function escapeNonWordChars(val: string): string {
-  // All chars other than word chars are percent encoded
-  return Array.from(new TextEncoder().encode(val))
-    .map((code: number) =>
-      SAFE_CHARS_SET.has(code) ? String.fromCharCode(code) : `%${code.toString(16).toUpperCase()}`,
-    )
-    .join('');
+function encodeNonWordChars(val: string): string {
+  // NOTE: not using encodeURIComponent since it encodes $ sign, we don't want that
+  return encodeURI(val).replace(ENCODE_CHAR_REGEX, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
 }
 
 /**
@@ -29,11 +25,11 @@ export function _stringify(val: any, depth: number): string {
     } else if (/^[tfn]$/.test(val)) {
       return `'${val}`;
     } else if (/^-?[0-9]/.test(val)) {
-      return `'${escapeNonWordChars(val)}`;
+      return `'${encodeNonWordChars(val)}`;
     } else if (SAFE_CHARS_REGEX.test(val)) {
       return val;
     } else {
-      return escapeNonWordChars(val);
+      return encodeNonWordChars(val);
     }
   } else if (Array.isArray(val)) {
     return '@(' + val.map((v) => _stringify(v, depth + 1)).join(',') + ')';
@@ -41,7 +37,7 @@ export function _stringify(val: any, depth: number): string {
     const str = Object.entries(val)
       // filter out undefined values like JSON.stringify
       .filter(([_, v]) => v !== undefined)
-      .map(([k, v]) => `${_stringify(k, depth + 1)}=${_stringify(v, depth + 1)}`)
+      .map(([k, v]) => `${_stringify(k, depth + 1)}=${v === '' ? v : _stringify(v, depth + 1)}`)
       .join(`&`);
 
     // only wrap in parentheses if nested object
@@ -95,7 +91,15 @@ function _parseObject(lexer: Lexer): Record<string, any> {
   while (lexer.peek() !== ')') {
     const key = _parseString(lexer);
     _ensureToken(lexer, '=');
-    const val = _parseValue(lexer);
+
+    // handle special case of `k=` which represents value as empty string
+    let val;
+    if (lexer.peek() === '&' || lexer.peek() === ')') {
+      val = '';
+    } else {
+      val = _parseValue(lexer);
+    }
+
     if (lexer.peek() !== ')') {
       _ensureToken(lexer, '&');
     }
@@ -125,6 +129,7 @@ function _parseArray(lexer: Lexer): any[] {
 
 function _parseString(lexer: Lexer): string {
   let str = lexer.peek()!;
+
   lexer.next();
   if (str[0] === "'") {
     str = str.slice(1);
