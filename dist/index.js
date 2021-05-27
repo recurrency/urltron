@@ -23,14 +23,14 @@ function _stringify(val) {
     }
     else if (valType === 'string') {
         if (val === '') {
-            return "'";
+            return '"';
         }
         else if (/^[tfn]$/.test(val)) {
-            return `'${val}`;
+            return `"${val}`;
         }
         else if (/^-?[0-9]/.test(val)) {
             // possibly a number, prefix with '
-            return `'${encodeString(val)}`;
+            return `"${encodeString(val)}`;
         }
         else if (/^[\w.-]+$/.test(val)) {
             return val;
@@ -129,7 +129,7 @@ function _parseArray(lexer) {
 function _parseString(lexer) {
     let str = lexer.peek();
     lexer.next();
-    if (str[0] === "'") {
+    if (str[0] === '"') {
         str = str.slice(1);
     }
     return decodeURIComponent(str);

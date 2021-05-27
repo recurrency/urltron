@@ -9,7 +9,7 @@ interface ValTest {
 describe('urltron', () => {
   describe('_stringify()', () => {
     const tests: ValTest[] = [
-      {val: '', expect: "'"},
+      {val: '', expect: '"'},
       {val: 'hello', expect: 'hello'},
       {
         val: '~!@#$%^&*_+-=(){}[]<>|\\/? "\'',
@@ -17,13 +17,13 @@ describe('urltron', () => {
       },
       {val: 'http://example.com/a b.jpg', expect: 'http%3A%2F%2Fexample.com%2Fa%20b.jpg'},
       {val: '😀', expect: '%F0%9F%98%80'},
-      {val: 't', expect: "'t"},
-      {val: 'f', expect: "'f"},
-      {val: 'n', expect: "'n"},
+      {val: 't', expect: '"t'},
+      {val: 'f', expect: '"f'},
+      {val: 'n', expect: '"n'},
       {val: 'true', expect: 'true'},
       {val: 'false', expect: 'false'},
-      {val: '1.2', expect: "'1.2"},
-      {val: '0', expect: "'0"},
+      {val: '1.2', expect: '"1.2'},
+      {val: '0', expect: '"0'},
 
       {val: 0, expect: '0'},
       {val: 1.2, expect: '1.2'},
@@ -51,7 +51,7 @@ describe('urltron', () => {
       {
         name: 'simple array',
         val: [true, false, null, 'hello world', 1.234, ''],
-        expect: "@(t,f,n,hello%20world,1.234,')",
+        expect: '@(t,f,n,hello%20world,1.234,")',
       },
       {name: 'empty object', val: {}, expect: ''},
       {name: 'empty array', val: [], expect: '@()'},
@@ -90,7 +90,7 @@ describe('urltron', () => {
           },
         },
         expect:
-          "%7E%21%40%23%24%25%5E%26%2A%28%29%3D%25=(num=@(','t,'f,'n,1,-2.3,-3e+100,t,f,n,n,n,n)&'=&query=&null=n&true=t&false=f&NaN=n&Infinity=n)",
+          '%7E%21%40%23%24%25%5E%26%2A%28%29%3D%25=(num=@(","t,"f,"n,1,-2.3,-3e+100,t,f,n,n,n,n)&"=&query=&null=n&true=t&false=f&NaN=n&Infinity=n)',
       },
     ];
 
