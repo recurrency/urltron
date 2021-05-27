@@ -2,7 +2,7 @@
 
 Stringify and parse json for url.
 
-Works wonderfully for SPA apps that want to store state in url. Read via `location.search` and `location.hash`. Navigate with `<a href="...">`, `history.push` and `location.assign`. Can be used with `react-router`'s `<Link to={...}` and `useLocation/useHistory` hooks.
+Works wonderfully for SPA apps that want to store state in url. Read via `location.search` and `location.hash`. Navigate with `<a href="...">`, `history.pushState` and `location.assign`. Can be used with `react-router`'s `<Link to={...}` and `useLocation/useHistory` hooks.
 
 ## Why use urltron?
 
