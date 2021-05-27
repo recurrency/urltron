@@ -33,7 +33,7 @@ urltrin.parse('limit=10&offset=20&query=hello');
 
 | urltron                                     | json                                                       |
 | ------------------------------------------- | ---------------------------------------------------------- |
-| `hello=world&limit=2`                       | `{"hello":"world","limit":2}`                              |
+| `hello=world%20tour&limit=2`                | `{"hello":"world tour","limit":2}`                         |
 | `query=`                                    | `{"query":""}`                                             |
 | `num=1.23`                                  | `{"num":1.23}`                                             |
 | `yep=t`                                     | `{"yep":true}`                                             |
