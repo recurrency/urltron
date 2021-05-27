@@ -1,12 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parse = exports.stringify = exports._stringify = void 0;
-const SAFE_CHARS = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$._-';
-const SAFE_CHARS_REGEX = new RegExp(`^[${SAFE_CHARS}]+$`);
-const ENCODE_CHAR_REGEX = new RegExp(`[^%${SAFE_CHARS}]`, 'g');
-function encodeNonWordChars(val) {
-    // NOTE: not using encodeURIComponent since it encodes $ sign, we don't want that
-    return encodeURI(val).replace(ENCODE_CHAR_REGEX, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+function encodeString(str) {
+    return encodeURIComponent(str).replace(/[^%\w.-]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
 }
 /**
  * Internal function that stringifies primitive values
@@ -33,13 +29,14 @@ function _stringify(val) {
             return `'${val}`;
         }
         else if (/^-?[0-9]/.test(val)) {
-            return `'${encodeNonWordChars(val)}`;
+            // possibly a number, prefix with '
+            return `'${encodeString(val)}`;
         }
-        else if (SAFE_CHARS_REGEX.test(val)) {
+        else if (/^[\w.-]+$/.test(val)) {
             return val;
         }
         else {
-            return encodeNonWordChars(val);
+            return encodeString(val);
         }
     }
     else if (Array.isArray(val)) {

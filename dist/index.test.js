@@ -1,9 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const index_1 = require("./index");
-// TODO: figure out why nodejs isn't exporting this by default
-global.TextEncoder = require('util').TextEncoder;
-global.TextDecoder = require('util').TextDecoder;
 describe('urltron', () => {
     describe('_stringify()', () => {
         const tests = [
@@ -11,7 +8,7 @@ describe('urltron', () => {
             { val: 'hello', expect: 'hello' },
             {
                 val: '~!@#$%^&*_+-=(){}[]<>|\\/? "\'',
-                expect: '%7E%21%40%23$%25%5E%26%2A_%2B-%3D%28%29%7B%7D%5B%5D%3C%3E%7C%5C%2F%3F%20%22%27',
+                expect: '%7E%21%40%23%24%25%5E%26%2A_%2B-%3D%28%29%7B%7D%5B%5D%3C%3E%7C%5C%2F%3F%20%22%27',
             },
             { val: 'http://example.com/a b.jpg', expect: 'http%3A%2F%2Fexample.com%2Fa%20b.jpg' },
             { val: '😀', expect: '%F0%9F%98%80' },
@@ -82,7 +79,7 @@ describe('urltron', () => {
                         Infinity: Number.POSITIVE_INFINITY,
                     },
                 },
-                expect: "%7E%21%40%23$%25%5E%26%2A%28%29%3D%25=(num=@(','t,'f,'n,1,-2.3,-3e+100,t,f,n,n,n,n)&'=&query=&null=n&true=t&false=f&NaN=n&Infinity=n)",
+                expect: "%7E%21%40%23%24%25%5E%26%2A%28%29%3D%25=(num=@(','t,'f,'n,1,-2.3,-3e+100,t,f,n,n,n,n)&'=&query=&null=n&true=t&false=f&NaN=n&Infinity=n)",
             },
         ];
         for (const test of tests) {

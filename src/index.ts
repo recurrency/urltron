@@ -1,10 +1,5 @@
-const SAFE_CHARS = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$._-';
-const SAFE_CHARS_REGEX = new RegExp(`^[${SAFE_CHARS}]+$`);
-const ENCODE_CHAR_REGEX = new RegExp(`[^%${SAFE_CHARS}]`, 'g');
-
-function encodeNonWordChars(val: string): string {
-  // NOTE: not using encodeURIComponent since it encodes $ sign, we don't want that
-  return encodeURI(val).replace(ENCODE_CHAR_REGEX, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+function encodeString(str: string): string {
+  return encodeURIComponent(str).replace(/[^%\w.-]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
 }
 
 /**
@@ -27,11 +22,12 @@ export function _stringify(val: any): string {
     } else if (/^[tfn]$/.test(val)) {
       return `'${val}`;
     } else if (/^-?[0-9]/.test(val)) {
-      return `'${encodeNonWordChars(val)}`;
-    } else if (SAFE_CHARS_REGEX.test(val)) {
+      // possibly a number, prefix with '
+      return `'${encodeString(val)}`;
+    } else if (/^[\w.-]+$/.test(val)) {
       return val;
     } else {
-      return encodeNonWordChars(val);
+      return encodeString(val);
     }
   } else if (Array.isArray(val)) {
     return '@(' + val.map((v) => _stringify(v)).join(',') + ')';
