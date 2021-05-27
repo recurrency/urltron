@@ -23,13 +23,13 @@ urltron.stringify({limit: 10, offset: 20, query: 'hello'});
 urltrin.parse('limit=10&offset=20&query=hello');
 ```
 
-# Design
+## Design
 
 - A flat object looks exactly like query paramters e.g `?k1=v&k2=v`.
 - Supports all valid json types (null, boolean, number, string, object and array).
 - Readable. Even without reading the spec, a user should be able to figure out the nested structure.
 
-# Examples
+## Examples
 
 | urltron                                     | json                                                       |
 | ------------------------------------------- | ---------------------------------------------------------- |
