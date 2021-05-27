@@ -77,7 +77,6 @@ describe('urltron', () => {
         expect:
           'select=@(id,name,age)&from=(table=users)&where=@((field=name&op=%21%3D&val=),(field=age&op=%3E&val=20))&sort=(field=name&desc=t)',
       },
-
       {
         name: 'complex escaped object',
         val: {
