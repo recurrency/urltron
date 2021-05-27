@@ -1,5 +1,7 @@
 function encodeString(str: string): string {
-  return encodeURIComponent(str).replace(/[^%\w.-]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+  return encodeURIComponent(str)
+    .replace(/[^%\w.-]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`)
+    .replace(/%20/g, '+'); // space is a frequently used character, use + instead
 }
 
 /**
@@ -18,12 +20,12 @@ export function _stringify(val: any): string {
     return str === 'null' ? 'n' : str;
   } else if (valType === 'string') {
     if (val === '') {
-      return '"';
+      return '~';
     } else if (/^[tfn]$/.test(val)) {
-      return `"${val}`;
+      return `~${val}`;
     } else if (/^-?[0-9]/.test(val)) {
       // possibly a number, prefix with '
-      return `"${encodeString(val)}`;
+      return `~${encodeString(val)}`;
     } else if (/^[\w.-]+$/.test(val)) {
       return val;
     } else {
@@ -136,10 +138,11 @@ function _parseString(lexer: Lexer): string {
   let str = lexer.peek()!;
 
   lexer.next();
-  if (str[0] === '"') {
+  if (str[0] === '~') {
     str = str.slice(1);
   }
-  return decodeURIComponent(str);
+
+  return decodeURIComponent(str.replace(/\+/g, '%20'));
 }
 
 function _parseValue(lexer: Lexer): any {
