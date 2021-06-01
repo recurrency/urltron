@@ -1,4 +1,4 @@
-[![CI](https://github.com/nojvek/urltron/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/nojvek/urltron/actions/workflows/ci.yml)
+[![CI](https://github.com/recurrency/urltron/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/nojvek/urltron/actions/workflows/ci.yml)
 [![npm total downloads](https://img.shields.io/npm/dt/urltron.svg?maxAge=2592000)](https://www.npmjs.com/package/urltron)
 [![licence](https://img.shields.io/npm/l/urltron.svg?maxAge=2592000)](https://github.com/nojvek/urltron)
 [![npm version](https://img.shields.io/npm/v/urltron.svg)](https://www.npmjs.com/package/urltron)
