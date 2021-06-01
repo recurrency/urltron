@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nojvek/urltron.git"
+    "url": "git+https://github.com/recurrency/urltron.git"
   },
   "keywords": [
     "json",
@@ -28,9 +28,9 @@
   "author": "nojvek",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nojvek/urltron/issues"
+    "url": "https://github.com/recurrency/urltron/issues"
   },
-  "homepage": "https://github.com/nojvek/urltron#readme",
+  "homepage": "https://github.com/recurrency/urltron#readme",
   "devDependencies": {
     "@types/jest": "^26.0.23",
     "@types/node": "^15.6.1",
