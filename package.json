@@ -1,6 +1,6 @@
 {
   "name": "urltron",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Stringify and parse json from url query parameters",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

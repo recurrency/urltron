@@ -41,8 +41,8 @@ describe('urltron', () => {
         const tests = [
             {
                 name: 'simple array',
-                val: [true, false, null, 'hello world', 1.234, ''],
-                expect: '@(t,f,n,hello+world,1.234,~)',
+                val: [true, false, null, 'hello world', 1.234, '12ft', ''],
+                expect: '@(t,f,n,hello+world,1.234,~12ft,~)',
             },
             { name: 'empty object', val: {}, expect: '' },
             { name: 'empty array', val: [], expect: '@()' },
@@ -62,7 +62,7 @@ describe('urltron', () => {
                     ],
                     sort: { field: 'name', desc: true },
                 },
-                expect: 'select=@(id,name,age)&from=(table=users)&where=@((field=name&op=%21%3D&val=),(field=age&op=%3E&val=20))&sort=(field=name&desc=t)',
+                expect: 'select=@(id,name,age)&from=(table=users)&where=@((field=name&op=%21%3D&val=),(field=age&op=%3E&val=20))&sort=(field=name&desc)',
             },
             {
                 name: 'complex escaped object',
@@ -79,17 +79,15 @@ describe('urltron', () => {
                         Infinity: Number.POSITIVE_INFINITY,
                     },
                 },
-                expect: '%7E%21%40%23%24%25%5E%26%2A%28%29%3D%25=(num=@(~,~t,~f,~n,1,-2.3,-3e+100,t,f,n,n,n,n)&~=&query=&null=n&true=t&false=f&NaN=n&Infinity=n)',
+                expect: '%7E%21%40%23%24%25%5E%26%2A%28%29%3D%25=(num=@(~,~t,~f,~n,1,-2.3,-3e+100,t,f,n,n,n,n)&~=&query=&null=n&true&false=f&NaN=n&Infinity=n)',
             },
         ];
         for (const test of tests) {
             it(test.name, () => {
                 const str = index_1.stringify(test.val);
                 expect(str).toEqual(test.expect);
-                if (typeof test.val === 'object' && test.val) {
-                    // ensure parse(stringify) == val (with undefined keys deep removed)
-                    expect(JSON.stringify(index_1.parse(str))).toEqual(JSON.stringify(test.val));
-                }
+                // ensure parse(stringify) == val (with undefined keys deep removed)
+                expect(JSON.stringify(index_1.parse(str))).toEqual(JSON.stringify(test.val));
             });
         }
     });

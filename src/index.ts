@@ -39,7 +39,7 @@ export function _stringify(val: any): string {
       Object.entries(val)
         // filter out undefined values like JSON.stringify
         .filter(([_, v]) => v !== undefined)
-        .map(([k, v]) => `${_stringify(k)}=${v === '' ? v : _stringify(v)}`)
+        .map(([k, v]) => `${_stringify(k)}${v === true ? '' : `=${v === '' ? '' : _stringify(v)}`}`)
         .join(`&`) +
       ')'
     );
@@ -97,14 +97,20 @@ function _parseObject(lexer: Lexer): Record<string, any> {
   _ensureToken(lexer, '(');
   while (lexer.peek() !== ')') {
     const key = _parseString(lexer);
-    _ensureToken(lexer, '=');
-
-    // handle special case of `k=` which represents value as empty string
     let val;
+
+    // handle `&k` case, which represents value as true
     if (lexer.peek() === '&' || lexer.peek() === ')') {
-      val = '';
+      val = true;
     } else {
-      val = _parseValue(lexer);
+      _ensureToken(lexer, '=');
+
+      // handle `&k=` case, which represents value as empty string
+      if (lexer.peek() === '&' || lexer.peek() === ')') {
+        val = '';
+      } else {
+        val = _parseValue(lexer);
+      }
     }
 
     if (lexer.peek() !== ')') {

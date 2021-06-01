@@ -37,17 +37,17 @@ urltrin.parse('limit=10&offset=20&query=hello');
 
 ## Examples
 
-| urltron                                     | json                                                       |
-| ------------------------------------------- | ---------------------------------------------------------- |
-| `hello=world+tour&limit=2`                  | `{"hello":"world tour","limit":2}`                         |
-| `query=`                                    | `{"query":""}`                                             |
-| `num=1.23`                                  | `{"num":1.23}`                                             |
-| `yep=t`                                     | `{"yep":true}`                                             |
-| `nah=f`                                     | `{"nah":false}`                                            |
-| `nada=n`                                    | `{"nada":null}`                                            |
-| `nStr=~n`                                   | `{"nStr":"n"}`                                             |
-| `numStr=~123`                               | `{"numStr":"123"}`                                         |
-| `arr=@(1,2,3)`                              | `{"arr":[1,2,3]}`                                          |
-| `jraphql=(id=t&name=t&books=(id=t&name=t))` | `{"jraphql":{id:true,name:true,books:{id:true,name:true}}` |
-| `@(@(1,2,3),@(4,5,6),@(7,8,9),0)`           | `[[1,2,3],[4,5,6],[7,8,9],0]`                              |
-| `@(~,hello,t,f,n,1,(a=(b=c)))`              | `["","hello",true,false,null,1,{"a":{"b":"c"}}]`           |
+| urltron                             | json                                                                 |
+| ----------------------------------- | -------------------------------------------------------------------- |
+| `hello=world+tour&limit=2&sort`     | `{"hello":"world tour","limit":2,"sort":true}`                       |
+| `query=`                            | `{"query":""}`                                                       |
+| `num=1.23`                          | `{"num":1.23}`                                                       |
+| `yep=t`                             | `{"yep":true}`                                                       |
+| `nah=f`                             | `{"nah":false}`                                                      |
+| `nada=n`                            | `{"nada":null}`                                                      |
+| `nStr=~n`                           | `{"nStr":"n"}`                                                       |
+| `numStr=~123`                       | `{"numStr":"123"}`                                                   |
+| `arr=@(1,2,3)`                      | `{"arr":[1,2,3]}`                                                    |
+| `jraphql=(id&name&books=(id&name))` | `{"jraphql":{"id":true,"name":true,"books":{"id":true,"name":true}}` |
+| `@(@(1,2,3),@(4,5,6),@(7,8,9),0)`   | `[[1,2,3],[4,5,6],[7,8,9],0]`                                        |
+| `@(~,hello,t,f,n,1,(a=(b=c)))`      | `["","hello",true,false,null,1,{"a":{"b":"c"}}]`                     |
