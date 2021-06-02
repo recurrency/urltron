@@ -71,9 +71,10 @@ interface Lexer {
 }
 
 function _lex(str: string): Lexer {
-  // split string while keeping delimiters
-  // @see https://medium.com/@shemar.gordon32/how-to-split-and-keep-the-delimiter-s-d433fb697c65
-  const tokens = str.split(/(?=[@()=&,])|(?<=[@()=&,])/g);
+  // split string while keeping delimiters, use () - capture to keep delimiter
+  // 'one..two'.split(/(\.)/); => ["one", ".", "", ".", "two"]
+  // so we need to filter out empty strings
+  const tokens = str.split(/([@()=&,])/).filter((c) => c !== '');
   let idx = 0;
   return {
     tokens,
