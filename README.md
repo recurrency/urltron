@@ -25,7 +25,7 @@ Same api as built-in `JSON.stringify` and `JSON.parse`.
 ```ts
 import urltron from 'urltron';
 urltron.stringify({limit: 10, offset: 20, query: 'hello'});
-urltrin.parse('limit=10&offset=20&query=hello');
+urltron.parse('limit=10&offset=20&query=hello');
 ```
 
 ## Design
