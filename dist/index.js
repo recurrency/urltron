@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parse = exports.stringify = exports._stringify = void 0;
+// based on diagram in https://www.json.org/json-en.html
+const NUM_REGEX = /^-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[1-9][0-9]*)?$/;
 function encodeString(str) {
     return encodeURIComponent(str)
         .replace(/[^%\w.-]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`)
@@ -27,15 +29,16 @@ function _stringify(val) {
         if (val === '') {
             return '~';
         }
-        else if (/^[tfn]$/.test(val)) {
+        else if (/^[tfn]$/.test(val) || NUM_REGEX.test(val)) {
+            // looks like a number, boolean or null. prefix it with ~
             return `~${val}`;
         }
-        else if (/^-?[0-9]/.test(val)) {
-            // possibly a number, prefix with '
-            return `~${encodeString(val)}`;
-        }
         else if (/^[\w.-]+$/.test(val)) {
+            // doesn't use special characters, skip encoding
             return val;
+        }
+        else if (val.startsWith('~')) {
+            return `~${encodeString(val)}`;
         }
         else {
             return encodeString(val);
@@ -166,7 +169,7 @@ function _parseValue(lexer) {
         lexer.next();
         return null;
     }
-    else if (/^-?[0-9]/.test(curToken)) {
+    else if (NUM_REGEX.test(curToken)) {
         lexer.next();
         return parseFloat(curToken);
     }
