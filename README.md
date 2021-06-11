@@ -28,6 +28,9 @@ urltron.stringify({limit: 10, offset: 20, query: 'hello'});
 urltron.parse('limit=10&offset=20&query=hello');
 ```
 
+## Playground
+https://observablehq.com/@noj/urltron-online-encoder-decoder
+
 ## Design
 
 - A flat object looks exactly like query paramters e.g `?k1=v&k2=v`.
