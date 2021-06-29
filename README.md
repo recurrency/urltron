@@ -54,3 +54,9 @@ https://observablehq.com/@noj/urltron-online-encoder-decoder
 | `jraphql=(id&name&books=(id&name))` | `{"jraphql":{"id":true,"name":true,"books":{"id":true,"name":true}}` |
 | `@(@(1,2,3),@(4,5,6),@(7,8,9),0)`   | `[[1,2,3],[4,5,6],[7,8,9],0]`                                        |
 | `@(~,hello,t,f,n,1,(a=(b=c)))`      | `["","hello",true,false,null,1,{"a":{"b":"c"}}]`                     |
+
+
+## Caveats
+
+* urltron works great as a replacement for `new URLSearchParams(..)`, but it expects values to be strict percent encoded. e.g `require('urltron').parse('a=n&b=e2hleTogInlhISIsICJvaCI6ICJvaCEifQ==')` will fail. If something else is passing values as url params then you'll need to exclude them or properl `encodeURIComponent` them. This should be passed instead as `require('urltron').parse('a=n&b=e2hleTogInlhISIsICJvaCI6ICJvaCEifQ%3D%3D')`
+
